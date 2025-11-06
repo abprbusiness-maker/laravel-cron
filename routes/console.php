@@ -3,6 +3,11 @@
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Schedule as ScheduleFacade;
 
+// LOG SETIAP MENIT untuk pastikan cron jalan
+Schedule::call(function () {
+    Log::info('✅ CRON ACTIVE: ' . now()->format('H:i:s'));
+})->everyMinute();
+
 // Jalanin test scheduler setiap menit
 // ScheduleFacade::command('discord:notify', ['⚡ Test Scheduler Every Minute'])->everyMinute();
 
