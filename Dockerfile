@@ -25,11 +25,9 @@ RUN composer install --no-dev --optimize-autoloader
 # Setup permissions
 RUN chmod -R 775 storage bootstrap/cache
 
-# Setup cron job
+# Setup cron job - FIX: remove the -l option
 RUN echo "* * * * * cd /workspace && /usr/local/bin/php artisan schedule:run >> /dev/stdout 2>&1" > /etc/crontabs/root
-
-# Make sure cron has proper permissions
 RUN chmod 0644 /etc/crontabs/root
 
-# Start both cron and PHP server
-CMD sh -c "crond -l 2 -f & php artisan serve --host=0.0.0.0 --port=8080"
+# FIX: Remove the -l option from crond
+CMD sh -c "crond -f & php artisan serve --host=0.0.0.0 --port=8080"
