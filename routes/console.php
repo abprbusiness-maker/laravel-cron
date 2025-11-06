@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Schedule;
 // Schedule::command('test:scheduler')->everyMinute();
 
 // Kirim notifikasi Discord setiap hari jam 00:00 (tengah malam)
-Schedule::command('discord:notify', ['🌙 Daily Check - Tengah malam nih bro!'])->dailyAt('00:10');
+Schedule::command('discord:notify', ['🌙 Daily Check - Tengah malam nih bro!'])->dailyAt('00:40');
 
 // Atau kalo mau custom message lain:
 // Schedule::command('discord:notify', ['💤 Selamat tidur! Server masih jalan nih.'])->dailyAt('00:00');

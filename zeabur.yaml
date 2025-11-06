@@ -1,4 +1,0 @@
-cron:
-  - schedule: "* * * * *"
-    command: "php artisan schedule:run"
-    service: laravel-cron

@@ -29,12 +29,12 @@ class SendDiscordNotification extends Command
         
         // Buat payload Discord dengan embeds (lebih keren)
         $payload = [
-            'username' => $appName . ' Bot',
-            'avatar_url' => 'https://cdn.discordapp.com/embed/avatars/0.png',
+            'username' => 'Ryo Bot',
+            'avatar_url' => config('app.url') . '/images.jpg',
             'embeds' => [
                 [
                     'title' => $customMessage ?: '🤖 Scheduler Notification',
-                    'description' => $customMessage ?: 'Halo bro! Scheduler Laravel gue jalan nih.',
+                    'description' => $customMessage ?: 'Halo bro! Gueh Ryo dan Scheduler Laravel gue jalan nih.',
                     'color' => 3447003, // Biru
                     'fields' => [
                         [
