@@ -4,7 +4,7 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Schedule as ScheduleFacade;
 
 // LOG SETIAP MENIT untuk pastikan cron jalan
-Schedule::call(function () {
+ScheduleFacade::call(function () {
     Log::info('✅ CRON ACTIVE: ' . now()->format('H:i:s'));
 })->everyMinute();
 
