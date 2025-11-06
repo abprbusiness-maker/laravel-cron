@@ -5,9 +5,7 @@ use Illuminate\Support\Facades\Schedule;
 // Jalanin test scheduler setiap menit
 // Schedule::command('test:scheduler')->everyMinute();
 
-// Test scheduler setiap 15 menit
-Schedule::command('discord:notify', ['⚡ Test Scheduler Every 15 Minutes'])->everyFifteenMinutes();
-
+Schedule::command('discord:notify', ['⚡ Test Scheduler Every Minute'])->everyMinute();
 
 // Atau kalo mau custom message lain:
 // Schedule::command('discord:notify', ['💤 Selamat tidur! Server masih jalan nih.'])->dailyAt('00:00');
