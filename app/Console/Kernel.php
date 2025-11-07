@@ -38,7 +38,9 @@ class Kernel extends ConsoleKernel
         // Command custom
         $schedule->command('discord:notify', ['☀️ Selamat pagi!'])->dailyAt('09:00');
 
-        $schedule->command('discord:notify', ['Test cepat'])->everyFiveMinutes();
+        $schedule->command('discord:notify', ['Test cepat'])->everyFiveMinutes()->before(function () {
+            \Illuminate\Support\Facades\Log::info('DEBUG: Scheduler akan memanggil discord:notify');
+        });
 
 
         // Contoh closure lain
