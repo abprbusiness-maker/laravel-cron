@@ -12,7 +12,7 @@ class Kernel extends ConsoleKernel
      */
     protected $commands = [
         // Daftarkan semua command custom di sini
-        \App\Console\Commands\DiscordNotify::class,
+        \App\Console\Commands\SendDiscordNotification::class,
     ];
 
     /**
@@ -36,7 +36,7 @@ class Kernel extends ConsoleKernel
         })->everyMinute();
 
         // Command custom
-        $schedule->command('discord:notify', ['☀️ Selamat pagi!'])->dailyAt('08:45');
+        $schedule->command('discord:notify', ['☀️ Selamat pagi!'])->dailyAt('09:00');
 
         // Contoh closure lain
         $schedule->call(function () {
