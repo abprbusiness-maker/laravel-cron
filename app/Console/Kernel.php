@@ -45,6 +45,16 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             \Illuminate\Support\Facades\Log::info('🔥 Closure scheduler jalan: ' . now());
         })->everyTenMinutes();
+        $schedule->call(function () {
+            \Illuminate\Support\Facades\Artisan::call('discord:notify', [
+                'message' => 'TEST FROM CLOSURE'
+            ]);
+        })->everyMinute();
+        $schedule->call(function () {
+            \Illuminate\Support\Facades\Log::info('ENV Discord:', [
+                'url' => env('DISCORD_WEBHOOK_URL')
+            ]);
+        })->everyMinute();
     }
 
     /**
