@@ -1,4 +1,4 @@
-FROM php:8.2-alpine3.23
+FROM php:8.2-alpine
 
 # Update dan install dependencies
 RUN apk update --no-cache && \
