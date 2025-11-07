@@ -17,45 +17,30 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Debug existing
+        // Debug log setiap menit (optional)
         $schedule->call(function () {
             \Illuminate\Support\Facades\Log::info('🔧 DEBUG CRON JOB - ' . now()->format('H:i:s'));
         })->everyMinute();
 
-        // Test: Jalankan command discord:notify setiap menit
-        $schedule->command('discord:notify')
-                 ->everyMinute()
-                 ->before(function () {
-                     \Illuminate\Support\Facades\Log::info('🔄 DISCORD COMMAND WILL EXECUTE');
-                 })
-                 ->onSuccess(function () {
-                     \Illuminate\Support\Facades\Log::info('✅ DISCORD COMMAND SUCCESS');
-                 })
-                 ->onFailure(function () {
-                     \Illuminate\Support\Facades\Log::info('❌ DISCORD COMMAND FAILED');
-                 });
+        // ✅ Jalankan discord:notify setiap 10 menit
+        $schedule->command('discord:notify', ['message' => 'Scheduled ping'])
+                ->everyTenMinutes()
+                ->before(function () {
+                    \Illuminate\Support\Facades\Log::info('🔄 DISCORD COMMAND WILL EXECUTE (10 min)');
+                })
+                ->onSuccess(function () {
+                    \Illuminate\Support\Facades\Log::info('✅ DISCORD COMMAND SUCCESS (10 min)');
+                })
+                ->onFailure(function () {
+                    \Illuminate\Support\Facades\Log::warning('❌ DISCORD COMMAND FAILED (10 min)');
+                });
 
-        // Atau, sebagai alternatif, kita bisa menggunakan closure untuk memanggil Artisan command
-        // $schedule->call(function () {
-        //     \Illuminate\Support\Facades\Artisan::call('discord:notify', [
-        //         'message' => 'TEST FROM CLOSURE'
-        //     ]);
-        // })->everyMinute();
-
+        // OPTIONAL: debug closure
         $schedule->call(function () {
-            \Illuminate\Support\Facades\Log::info('🔥 Closure scheduler jalan: ' . now());
+            \Illuminate\Support\Facades\Log::info('🔥 Closure scheduler jalan (10 min): ' . now());
         })->everyTenMinutes();
-        $schedule->call(function () {
-            \Illuminate\Support\Facades\Artisan::call('discord:notify', [
-                'message' => 'TEST FROM CLOSURE'
-            ]);
-        })->everyMinute();
-        $schedule->call(function () {
-            \Illuminate\Support\Facades\Log::info('ENV Discord:', [
-                'url' => env('DISCORD_WEBHOOK_URL')
-            ]);
-        })->everyMinute();
     }
+
 
     /**
      * Register the commands for the application.
