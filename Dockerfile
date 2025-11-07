@@ -46,8 +46,6 @@ RUN echo '#!/bin/sh' > /run-artisan.sh && \
     echo 'php artisan "$@"' >> /run-artisan.sh && \
     chmod +x /run-artisan.sh
 
-# Setup cron job dengan environment yang explicit
-RUN echo "* * * * * /run-artisan.sh schedule:run >> /workspace/storage/logs/cron.log 2>&1" > /etc/crontabs/root
 
 # Dummy sendmail
 RUN ln -sf /bin/true /usr/sbin/sendmail
