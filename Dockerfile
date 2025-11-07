@@ -13,7 +13,7 @@ RUN apk update --no-cache && \
       libzip-dev \
       tzdata
 
-# Set timezone
+# Set timezone secara eksplisit
 RUN cp /usr/share/zoneinfo/Asia/Jakarta /etc/localtime && \
     echo "Asia/Jakarta" > /etc/timezone
 
@@ -34,6 +34,20 @@ RUN chmod -R 775 storage bootstrap/cache
 
 # Setup supervisord
 COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Buat script untuk menjalankan artisan dengan environment yang benar
+RUN echo '#!/bin/sh' > /run-artisan.sh && \
+    echo 'cd /workspace' >> /run-artisan.sh && \
+    echo 'export APP_ENV=local' >> /run-artisan.sh && \
+    echo 'export APP_DEBUG=true' >> /run-artisan.sh && \
+    echo 'export APP_URL=https://laravel-cron.zeabur.app/' >> /run-artisan.sh && \
+    echo 'export DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1436033524237996203/teYNvHOFjQeiZR6OK9rXqutNXksnuVTvEHCOrOGJ5hj5we4XAuzBze0tAFek0y0RTYWs' >> /run-artisan.sh && \
+    echo 'export APP_TIMEZONE=Asia/Jakarta' >> /run-artisan.sh && \
+    echo 'php artisan "$@"' >> /run-artisan.sh && \
+    chmod +x /run-artisan.sh
+
+# Setup cron job dengan environment yang explicit
+RUN echo "* * * * * /run-artisan.sh schedule:run >> /workspace/storage/logs/cron.log 2>&1" > /etc/crontabs/root
 
 # Dummy sendmail
 RUN ln -sf /bin/true /usr/sbin/sendmail
