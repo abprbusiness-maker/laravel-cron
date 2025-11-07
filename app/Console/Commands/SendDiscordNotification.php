@@ -13,6 +13,7 @@ class SendDiscordNotification extends Command
 
     public function handle()
     {
+        Log::info('DEBUG: Discord job dijalankan', ['env' => env('DISCORD_WEBHOOK_URL')]);
         $webhookUrl = env('DISCORD_WEBHOOK_URL');
         
         if (!$webhookUrl) {
