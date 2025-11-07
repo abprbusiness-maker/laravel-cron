@@ -41,10 +41,14 @@ RUN echo '#!/bin/sh' > /run-artisan.sh && \
     echo 'export APP_ENV=local' >> /run-artisan.sh && \
     echo 'export APP_DEBUG=true' >> /run-artisan.sh && \
     echo 'export APP_URL=https://laravel-cron.zeabur.app/' >> /run-artisan.sh && \
-    echo 'export DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1436033524237996203/teYNvHOFjQeiZR6OK9rXqutNXksnuVTvEHCOrOGJ5hj5we4XAuzBze0tAFek0y0RTYWs' >> /run-artisan.sh && \
+    echo 'export DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/....' >> /run-artisan.sh && \
     echo 'export APP_TIMEZONE=Asia/Jakarta' >> /run-artisan.sh && \
-    echo 'php artisan "$@"' >> /run-artisan.sh && \
+    echo 'while true; do' >> /run-artisan.sh && \
+    echo '  php artisan schedule:run' >> /run-artisan.sh && \
+    echo '  sleep 60' >> /run-artisan.sh && \
+    echo 'done' >> /run-artisan.sh && \
     chmod +x /run-artisan.sh
+
 
 
 # Dummy sendmail
