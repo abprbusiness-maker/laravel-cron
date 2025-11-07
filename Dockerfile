@@ -6,17 +6,21 @@ RUN apk update --no-cache && \
       curl \
       git \
       unzip \
-      cronie \
+      supervisor \
       mysql-client \
       mysql-dev \
       bash \
       libzip-dev \
       tzdata
 
+# Set timezone
+RUN cp /usr/share/zoneinfo/Asia/Jakarta /etc/localtime && \
+    echo "Asia/Jakarta" > /etc/timezone
+
 # Install PHP extensions untuk MySQL
 RUN docker-php-ext-install pdo pdo_mysql
 
-# Install Composer dari image resmi
+# Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /workspace
@@ -28,12 +32,11 @@ RUN composer install --no-dev --optimize-autoloader
 # Set permissions
 RUN chmod -R 775 storage bootstrap/cache
 
-# Setup cron job (kalau lo mau tetap pake cron di image)
-RUN echo "* * * * * cd /workspace && php artisan schedule:run >> /dev/null 2>&1" > /etc/crontabs/root
-RUN crontab /etc/crontabs/root
+# Setup supervisord
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
-# Dummy sendmail supaya nggak error di mail functions
+# Dummy sendmail
 RUN ln -sf /bin/true /usr/sbin/sendmail
 
-# Jalankan cron & laravel server
-CMD sh -c "crond -f & php artisan serve --host=0.0.0.0 --port=8080"
+# Jalankan supervisord
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
