@@ -8,42 +8,40 @@ use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 class Kernel extends ConsoleKernel
 {
     /**
-     * The Artisan commands provided by your application.
+     * Tidak perlu mendaftarkan command secara manual karena menggunakan auto-load.
      */
-    protected $commands = [
-        // Daftarkan semua command custom di sini
-        \App\Console\Commands\SendDiscordNotification::class,
-    ];
+    protected $commands = [];
 
     /**
      * Define the application's command schedule.
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Semua scheduler closure atau command bisa dimasukin sini
+        // Debug existing
         $schedule->call(function () {
-            \Illuminate\Support\Facades\Log::info('🔧 DEBUG CRON JOB', [
-                'time' => now()->format('Y-m-d H:i:s'),
-                'timezone' => config('app.timezone'),
-                'env_timezone' => env('APP_TIMEZONE'),
-                'discord_webhook_set' => !empty(env('DISCORD_WEBHOOK_URL')),
-                'memory' => memory_get_usage(true) / 1024 / 1024 . ' MB'
-            ]);
+            \Illuminate\Support\Facades\Log::info('🔧 DEBUG CRON JOB - ' . now()->format('H:i:s'));
         })->everyMinute();
 
-        $schedule->call(function () {
-            \Illuminate\Support\Facades\Log::info('✅ CRON ACTIVE: ' . now()->format('H:i:s'));
-        })->everyMinute();
+        // Test: Jalankan command discord:notify setiap menit
+        $schedule->command('discord:notify')
+                 ->everyMinute()
+                 ->before(function () {
+                     \Illuminate\Support\Facades\Log::info('🔄 DISCORD COMMAND WILL EXECUTE');
+                 })
+                 ->onSuccess(function () {
+                     \Illuminate\Support\Facades\Log::info('✅ DISCORD COMMAND SUCCESS');
+                 })
+                 ->onFailure(function () {
+                     \Illuminate\Support\Facades\Log::info('❌ DISCORD COMMAND FAILED');
+                 });
 
-        // Command custom
-        $schedule->command('discord:notify', ['☀️ Selamat pagi!'])->dailyAt('09:00');
+        // Atau, sebagai alternatif, kita bisa menggunakan closure untuk memanggil Artisan command
+        // $schedule->call(function () {
+        //     \Illuminate\Support\Facades\Artisan::call('discord:notify', [
+        //         'message' => 'TEST FROM CLOSURE'
+        //     ]);
+        // })->everyMinute();
 
-        $schedule->command('discord:notify', ['Test cepat'])->everyFiveMinutes()->before(function () {
-            \Illuminate\Support\Facades\Log::info('DEBUG: Scheduler akan memanggil discord:notify');
-        });
-
-
-        // Contoh closure lain
         $schedule->call(function () {
             \Illuminate\Support\Facades\Log::info('🔥 Closure scheduler jalan: ' . now());
         })->everyTenMinutes();
@@ -54,7 +52,6 @@ class Kernel extends ConsoleKernel
      */
     protected function commands(): void
     {
-        // Auto-load semua command di folder Commands
         $this->load(__DIR__.'/Commands');
 
         require base_path('routes/console.php');
