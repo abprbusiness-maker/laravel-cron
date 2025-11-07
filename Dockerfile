@@ -1,34 +1,39 @@
-FROM php:8.2-alpine
+FROM php:8.2-alpine3.23
 
-# Install dependencies WITHOUT mail capabilities
-RUN apk add --no-cache \
-    curl \
-    git \
-    unzip \
-    cronie \
-    mysql-dev
+# Update dan install dependencies
+RUN apk update --no-cache && \
+    apk add --no-cache \
+      curl \
+      git \
+      unzip \
+      cronie \
+      mysql-client \
+      mysql-dev \
+      bash \
+      libzip-dev \
+      tzdata
 
-# Install PHP extensions
+# Install PHP extensions untuk MySQL
 RUN docker-php-ext-install pdo pdo_mysql
 
-# Install Composer
+# Install Composer dari image resmi
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 
 WORKDIR /workspace
 COPY . .
 
-# Install dependencies
+# Install dependencies Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# Setup permissions
+# Set permissions
 RUN chmod -R 775 storage bootstrap/cache
 
-# Setup cron job
-RUN echo "* * * * * cd /workspace && php artisan schedule:run" > /etc/crontabs/root
+# Setup cron job (kalau lo mau tetap pake cron di image)
+RUN echo "* * * * * cd /workspace && php artisan schedule:run >> /dev/null 2>&1" > /etc/crontabs/root
 RUN crontab /etc/crontabs/root
 
-# Create a dummy sendmail to prevent errors
+# Dummy sendmail supaya nggak error di mail functions
 RUN ln -sf /bin/true /usr/sbin/sendmail
 
-# Start cron and PHP server
+# Jalankan cron & laravel server
 CMD sh -c "crond -f & php artisan serve --host=0.0.0.0 --port=8080"
