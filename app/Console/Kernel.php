@@ -36,7 +36,7 @@ class Kernel extends ConsoleKernel
         })->everyMinute();
 
         // Command custom
-        $schedule->command('discord:notify', ['☀️ Selamat pagi!'])->dailyAt('08:00');
+        $schedule->command('discord:notify', ['☀️ Selamat pagi!'])->dailyAt('08:45');
 
         // Contoh closure lain
         $schedule->call(function () {
