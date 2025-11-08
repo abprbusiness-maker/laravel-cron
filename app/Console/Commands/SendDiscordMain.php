@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
-class SendDiscordNotification extends Command
+class SendDiscordMain extends Command
 {
     protected $signature = 'discord:main {message?}';
     protected $description = 'Kirim notifikasi ke Discord channel via webhook';
