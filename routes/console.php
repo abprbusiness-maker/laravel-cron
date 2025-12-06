@@ -20,8 +20,9 @@ use Illuminate\Support\Facades\Schedule as ScheduleFacade;
 // })->everyMinute();
 
 // Schedule yang lain tetap...
-ScheduleFacade::command('discord:notify', ['☀️ Selamat pagi!'])->dailyAt('08:00');
+// ScheduleFacade::command('discord:notify', ['☀️ Selamat pagi!'])->dailyAt('08:00');
 ScheduleFacade::command('discord:main')->dailyAt('20:00');
+ScheduleFacade::command('discord:weather')->dailyAt('06:00');
 ScheduleFacade::command('discord:weather')->dailyAt('09:00');
 ScheduleFacade::command('discord:weather')->dailyAt('12:00');
 ScheduleFacade::command('discord:weather')->dailyAt('15:00');
