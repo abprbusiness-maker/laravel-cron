@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Schedule as ScheduleFacade;
 //         'discord_webhook_set' => !empty(env('DISCORD_WEBHOOK_URL')),
 //         'memory' => memory_get_usage(true) / 1024 / 1024 . ' MB'
 //     ]);
-// })->everyMinute();
+// })->everyMinute(); aaa
 
 // LOG SETIAP MENIT untuk pastikan cron jalan
 // ScheduleFacade::call(function () {
