@@ -25,9 +25,7 @@ ScheduleFacade::command('discord:main')->dailyAt('20:00');
 ScheduleFacade::command('discord:weather')->dailyAt('06:00');
 ScheduleFacade::command('discord:weather')->dailyAt('09:00');
 ScheduleFacade::command('discord:weather')->dailyAt('12:00');
-ScheduleFacade::command('discord:weather')->dailyAt('15:00');
 ScheduleFacade::command('discord:weather')->dailyAt('18:00');
-ScheduleFacade::command('discord:weather')->dailyAt('21:00');
 
 // Contoh pake closure langsung
 // ScheduleFacade::call(function () {
