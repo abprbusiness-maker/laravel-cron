@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Schedule as ScheduleFacade;
 //         'discord_webhook_set' => !empty(env('DISCORD_WEBHOOK_URL')),
 //         'memory' => memory_get_usage(true) / 1024 / 1024 . ' MB'
 //     ]);
-// })->everyMinute(); aaa
+// })->everyMinute();
 
 // LOG SETIAP MENIT untuk pastikan cron jalan
 // ScheduleFacade::call(function () {
@@ -20,10 +20,8 @@ use Illuminate\Support\Facades\Schedule as ScheduleFacade;
 // })->everyMinute();
 
 // Schedule yang lain tetap...
-// ScheduleFacade::command('discord:notify', ['☀️ Selamat pagi!'])->dailyAt('08:00');
+ScheduleFacade::command('discord:notify', ['☀️ Selamat pagi!'])->dailyAt('08:00');
 ScheduleFacade::command('discord:main')->dailyAt('20:00');
-ScheduleFacade::command('discord:weather')->dailyAt('06:00');
-ScheduleFacade::command('discord:weather')->dailyAt('09:00');
 ScheduleFacade::command('discord:weather')->dailyAt('12:00');
 ScheduleFacade::command('discord:weather')->dailyAt('18:00');
 

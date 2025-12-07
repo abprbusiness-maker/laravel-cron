@@ -1,24 +1,24 @@
 FROM php:8.2-alpine
 
-# Install dependencies
+# Update dan install dependencies
 RUN apk update --no-cache && \
     apk add --no-cache \
       curl \
       git \
       unzip \
       supervisor \
-      bash \
-      tzdata \
-      libzip-dev \
       mysql-client \
-      mysql-dev
+      mysql-dev \
+      bash \
+      libzip-dev \
+      tzdata
 
-# Set timezone
+# Set timezone secara eksplisit
 RUN cp /usr/share/zoneinfo/Asia/Jakarta /etc/localtime && \
     echo "Asia/Jakarta" > /etc/timezone
 
-# PHP extensions
-RUN docker-php-ext-install pdo pdo_mysql zip
+# Install PHP extensions untuk MySQL
+RUN docker-php-ext-install pdo pdo_mysql
 
 # Install Composer
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
@@ -26,25 +26,35 @@ COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
 WORKDIR /workspace
 COPY . .
 
-# Laravel dependencies
+# Install dependencies Laravel
 RUN composer install --no-dev --optimize-autoloader
 
-# Permissions
+# Set permissions
 RUN chmod -R 775 storage bootstrap/cache
 
-# Scheduler script (runs forever every 60s)
+# Setup supervisord
+COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+
+# Buat script untuk menjalankan artisan dengan environment yang benar
 RUN echo '#!/bin/sh' > /run-artisan.sh && \
     echo 'cd /workspace' >> /run-artisan.sh && \
+    echo 'export APP_ENV=local' >> /run-artisan.sh && \
+    echo 'export APP_DEBUG=true' >> /run-artisan.sh && \
+    echo 'export APP_URL=https://laravel-cron.zeabur.app/' >> /run-artisan.sh && \
+    echo 'export DISCORD_WEBHOOK_URL=https://discord.com/api/webhooks/1436033524237996203/teYNvHOFjQeiZR6OK9rXqutNXksnuVTvEHCOrOGJ5hj5we4XAuzBze0tAFek0y0RTYWs' >> /run-artisan.sh && \
+    echo 'export DISCORD_WEBHOOK_URL_WEATHER=https://discord.com/api/webhooks/1436559617181220988/teYNvHOFjQeiZR6OK9rXqutNXksnuVTvEHCOrOGJ5hj5we4XAuzBze0tAFek0y0RTYWs' >> /run-artisan.sh && \
+    echo 'export APP_TIMEZONE=Asia/Jakarta' >> /run-artisan.sh && \
     echo 'while true; do' >> /run-artisan.sh && \
     echo '  php artisan schedule:run' >> /run-artisan.sh && \
     echo '  sleep 60' >> /run-artisan.sh && \
     echo 'done' >> /run-artisan.sh && \
     chmod +x /run-artisan.sh
 
-# Expose default port (Zeabur overrides this)
-EXPOSE 8080
 
-# Copy Supervisor config
-COPY supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 
+
+# Dummy sendmail
+RUN ln -sf /bin/true /usr/sbin/sendmail
+
+# Jalankan supervisord
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]

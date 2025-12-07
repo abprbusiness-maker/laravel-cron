@@ -1,24 +1,39 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Log;
+
+Route::get('/test-scheduler', function () {
+    Log::info('🔄 Manual scheduler triggered via URL');
+    
+    $output = [];
+    $result = Artisan::call('schedule:run', [], $output);
+    
+    Log::info('Scheduler result: ' . $result);
+    
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Scheduler executed manually',
+        'time' => now()->toDateTimeString(),
+        'result' => $result
+    ]);
+});
+
+Route::get('/test-discord', function () {
+    Log::info('🔄 Manual discord command triggered via URL');
+    
+    $result = Artisan::call('discord:notify', ['message' => '⚡ Test dari Manual URL']);
+    
+    return response()->json([
+        'status' => 'success', 
+        'message' => 'Discord command executed',
+        'time' => now()->toDateTimeString(),
+        'result' => $result
+    ]);
+});
+
 
 Route::get('/', function () {
     return view('welcome');
-})->name('home');
-
-// Auth Routes
-Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
-Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-
-Route::get('/dashboard', function () {
-    // Manual check session
-    if (!session()->has('user')) {
-        return redirect('/login')->with('error', 'Please login first!');
-    }
-    
-    $user = session('user');
-    return view('dashboard', compact('user'));
-})->name('dashboard');
+});
