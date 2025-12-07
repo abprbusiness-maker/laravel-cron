@@ -60,7 +60,7 @@ class SendWeatherToDiscord extends Command
     public function handle()
     {
         $webhookUrl = env('DISCORD_WEBHOOK_URL_WEATHER');
-        $adm4 = '31.73.06.1003'; // ✅ Tegal Alur
+        $adm4 = '31.73.05.1002';
 
         if (!$webhookUrl) {
             $this->error('❌ DISCORD_WEBHOOK_URL belum di-set.');
@@ -70,8 +70,7 @@ class SendWeatherToDiscord extends Command
         try {
             $apiUrl = "https://api.bmkg.go.id/publik/prakiraan-cuaca?adm4={$adm4}";
 
-            // Fetch dari BMKG (GET request)
-            $response = Http::timeout(10)->get($apiUrl);
+            $response = Http::timeout(15)->get($apiUrl);
 
             if (!$response->successful()) {
                 Log::error("BMKG ERROR", ['body' => $response->body()]);
@@ -81,71 +80,52 @@ class SendWeatherToDiscord extends Command
 
             $json = $response->json();
 
-            // 🔍 DEBUG: Cek struktur data BMKG
-            Log::info('BMKG RESPONSE', ['json' => $json]);
-
-            // Validasi struktur data
-            if (empty($json['data']) || empty($json['lokasi'])) {
-                Log::error('BMKG INVALID STRUCTURE', ['response' => $json]);
-                $this->error("Data BMKG tidak valid.");
-                return Command::FAILURE;
-            }
-
-            // Ambil data dengan cara yang lebih aman
-            $cuacaData = $json['data'][0]['cuaca'] ?? [];
-            if (empty($cuacaData)) {
-                Log::error('BMKG NO WEATHER DATA');
-                $this->error("Tidak ada data cuaca.");
-                return Command::FAILURE;
-            }
-
-            $firstData = $cuacaData[0][0] ?? [];
+            // Ambil data cuaca pertama (paling dekat ke jam sekarang)
+            $firstData = $json['data'][0]['cuaca'][0][0];
 
             $lokasi = $json['lokasi'];
-            $desa = $lokasi['desa'] ?? 'Unknown';
-            $kecamatan = $lokasi['kecamatan'] ?? 'Unknown';
-            $kotkab = $lokasi['kotkab'] ?? 'Unknown';
+            $desa = $lokasi['desa'];
+            $kecamatan = $lokasi['kecamatan'];
+            $kotkab = $lokasi['kotkab'];
 
-            // Extract dengan default values yang lebih baik
-            $desc = $firstData['weather_desc'] ?? 'Tidak tersedia';
-            $temp = $firstData['t'] ?? 0;
-            $humidity = $firstData['hu'] ?? 0;
-            $tp = floatval($firstData['tp'] ?? 0);
-            $tcc = floatval($firstData['tcc'] ?? 0);
-            $ws = floatval($firstData['ws'] ?? 0);
-            $icon = $firstData['image'] ?? 'https://laravel-cron.zeabur.app/default.png';
-            if (!empty($icon)) {
-                $icon = str_replace(' ', '%20', $icon); // encode spasi
-            }
+            // Extract
+            $desc = $firstData['weather_desc'];
+            $icon = $firstData['image'];
+            $temp = $firstData['t'];
+            $humidity = $firstData['hu'];
+            $tp = $firstData['tp'] ?? 0;
+            $tcc = $firstData['tcc'] ?? 0;   // Tutupan awan
+            $ws = $firstData['ws'] ?? 0;    // Wind speed (alias $wind)
+            $localTime = $firstData['local_datetime'];
 
-            $localTime = $firstData['local_datetime'] ?? now()->timezone('Asia/Jakarta')->format('Y-m-d H:i:s');
             $timestamp = now()->timezone('Asia/Jakarta')->toIso8601String();
 
             // Hitung probabilitas hujan
             $rainPercent = calculateRainProbability($tp, $tcc, $ws);
+
+            // Interpretasi (emoji + teks)
             $rainInfo = interpretRainChance($rainPercent);
+            $rainLabel = $rainInfo['label'];
+            $rainEmoji = $rainInfo['emoji'];
 
-            // Build description (TANPA indentasi heredoc!)
-            $description = "**Lokasi:** {$desa}, {$kecamatan}, {$kotkab}\n"
-                . "**Waktu:** {$localTime} WIB\n\n"
-                . "**Cuaca:** {$desc}\n"
-                . "**Suhu:** {$temp}°C\n"
-                . "**Kelembapan:** {$humidity}%\n"
-                . "**Angin:** {$ws} km/jam\n"
-                . "**Curah Hujan:** {$tp} mm\n\n"
-                . "**Peluang Hujan:** {$rainPercent}% {$rainInfo['emoji']}\n"
-                . "{$rainInfo['label']}\n\n"
-                . "_Sumber data: BMKG_";
-
-
-            // Embed Discord dengan struktur yang lebih strict
+            // Embed Discord
             $payload = [
                 'username' => 'NightRunner Bot',
                 'avatar_url' => 'https://laravel-cron.zeabur.app/images.jpg',
                 'embeds' => [
                     [
-                        'title' => '🌤️ Weather Pulse',
-                        'description' => $description,
+                        'title' => "🌤️ Weather Pulse",
+                        'description' =>
+                            "**Lokasi:** {$desa}, {$kecamatan}, {$kotkab}\n"
+                            . "**Waktu:** {$localTime} WIB\n\n"
+                            . "**Cuaca:** {$desc}\n"
+                            . "**Suhu:** {$temp}°C\n"
+                            . "**Kelembapan:** {$humidity}%\n"
+                            . "**Angin:** {$ws} km/jam\n"
+                            . "**Curah Hujan:** {$tp} mm\n\n"
+                            . "**Peluang Hujan:** {$rainPercent}% {$rainEmoji}\n"
+                            . "{$rainLabel}\n\n"
+                            . "_Sumber data: BMKG_",
                         'color' => 10181046,
                         'thumbnail' => [
                             'url' => $icon
@@ -158,10 +138,7 @@ class SendWeatherToDiscord extends Command
                 ]
             ];
 
-            // Debug payload sebelum kirim
-            Log::info('DISCORD PAYLOAD', ['payload' => $payload]);
-
-            $send = Http::timeout(10)->asJson()->post($webhookUrl, $payload);
+            $send = Http::timeout(10)->post($webhookUrl, $payload);
 
             if ($send->successful()) {
                 $this->info("✅ Weather berhasil dikirim!");
