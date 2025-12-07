@@ -56,5 +56,6 @@ RUN echo '#!/bin/sh' > /run-artisan.sh && \
 # Dummy sendmail
 RUN ln -sf /bin/true /usr/sbin/sendmail
 
+EXPOSE 8080
 # Jalankan supervisord
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
